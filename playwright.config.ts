@@ -65,14 +65,12 @@ export default defineConfig({
      * Everything, in a clean browser with no saved session.
      *
      * The 2.0 suite splits into `setup` / `signed-out` / `signed-in`, where a
-     * single `auth.setup.ts` signs in once and saves storageState. That split is
-     * deliberately absent here: this portal authenticates ONLY by a 6-digit code
-     * emailed or texted to the citizen, so a test cannot sign itself in without
-     * programmatic access to that inbox.
+     * single `auth.setup.ts` signs in once and saves storageState. There is no
+     * equivalent here, by decision: signing in needs a 6-digit code sent to a
+     * real inbox or phone, and automating that is OUT OF SCOPE for this suite.
      *
-     * When that is solved, mirror 2.0 exactly — add an `auth.setup.ts` writing
-     * AUTH_FILE, list the signed-out specs by filename, and add a `signed-in`
-     * project with `dependencies: ['setup']` and `storageState: AUTH_FILE`.
+     * So everything behind the sign-in screen is untested, and nothing in this
+     * repo should press Send code for real. Keep new specs signed out.
      */
     {
       name: 'signed-out',

@@ -50,23 +50,19 @@ npx playwright test auth-form.spec.ts
 ## Why nothing signs in
 
 The CosmoSmart 2.0 suite signs in once in `auth.setup.ts`, saves the browser
-session, and runs everything else already authenticated. **This suite cannot do
-that.** The citizen portal has no password: the only way in is a 6-digit code
-sent by SMS or email to a real phone or inbox, so a test cannot sign itself in
-without programmatic access to that mailbox.
+session, and runs everything else already authenticated. **This suite does not
+sign in at all.** The citizen portal has no password — the only way in is a
+6-digit code sent by SMS or email to a real phone or inbox — and automating
+that is **out of scope by decision**.
 
 Two consequences:
 
-- Every spec runs in the single `signed-out` project. There is no `setup` or
-  `signed-in` project yet — `playwright.config.ts` documents the exact shape to
-  add once this is solved.
+- Every spec runs in the single `signed-out` project, and everything behind the
+  sign-in screen is untested. Coverage stops at the auth form.
 - **Tests must never actually press Send code.** Against this deployment that
   mails or texts a real person, costs money, and is rate limited. The only test
   that touches the button intercepts the request with `page.route()` first, to
   prove an empty form never leaves the browser.
-
-`showDevOtp` is compiled to `false` in the deployed bundle, so the
-"development only" code display is not available here either.
 
 ## The app under test
 
@@ -80,11 +76,10 @@ Data comes from the CosmoSmart backend on a **different host**
 (`cosmossmart.azurewebsites.net`) — the same API the 2.0 dashboard is tested
 against:
 
-| Endpoint                                | Used for                     |
-| --------------------------------------- | ---------------------------- |
-| `GET  /api/public/grievance/corporations` | The "Your city" dropdown     |
-| `POST /api/public/grievance/otp`          | Sending a code — never called for real |
-| `POST /api/public/grievance/otp/verify`   | Checking a code              |
+| Endpoint                                  | Used for                                            |
+| ----------------------------------------- | --------------------------------------------------- |
+| `GET  /api/public/grievance/corporations` | The "Your city" dropdown                            |
+| `POST /api/public/grievance/otp`          | Sending a code — intercepted, never called for real |
 
 The screen is properly labelled — real tabs, a named radiogroup, a labelled
 combobox — so every locator is role-based and none reach for a CSS class. No
