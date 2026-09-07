@@ -7,9 +7,29 @@
 //! summary is only used on CI).
 
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'node:fs';
 import 'dotenv/config';
 
 export const AUTH_FILE = 'playwright/.auth/citizen.json';
+
+/*
+ * Signing in needs a 6-digit code from a real inbox, and automating that is out
+ * of scope. Instead `npm run capture-session` opens a browser, waits for a
+ * human to sign in, and saves the session here — so the manual step happens
+ * once, by hand, rather than on every run.
+ *
+ * Without that file the signed-in project is left out entirely: a project whose
+ * storageState is missing fails at browser-launch with an unhelpful error, and
+ * a suite that cannot possibly pass should not pretend to run.
+ */
+const hasSession = fs.existsSync(AUTH_FILE);
+
+if (!hasSession && !process.env.CI) {
+  console.warn(
+    `\n  No ${AUTH_FILE} — skipping the signed-in tests.` +
+      '\n  Run `npm run capture-session` to sign in once and record a session.\n',
+  );
+}
 
 export default defineConfig({
   testDir: './tests',
@@ -62,19 +82,33 @@ export default defineConfig({
 
   projects: [
     /*
-     * Everything, in a clean browser with no saved session.
-     *
-     * The 2.0 suite splits into `setup` / `signed-out` / `signed-in`, where a
-     * single `auth.setup.ts` signs in once and saves storageState. There is no
-     * equivalent here, by decision: signing in needs a 6-digit code sent to a
-     * real inbox or phone, and automating that is OUT OF SCOPE for this suite.
-     *
-     * So everything behind the sign-in screen is untested, and nothing in this
-     * repo should press Send code for real. Keep new specs signed out.
+     * The public screens, in a clean browser with no saved session.
+     * Nothing in here should ever press Send code for real.
      */
     {
       name: 'signed-out',
+      testIgnore: /signed-in\//,
       use: { ...devices['Desktop Chrome'], storageState: { cookies: [], origins: [] } },
     },
+
+    /*
+     * Everything behind the sign-in, replaying the session captured by hand.
+     *
+     * ONE worker, unlike the signed-out project. The app holds a refresh token
+     * that rotates on use (see the "cosmosmart-citizen-refresh" lock in the
+     * bundle): two workers replaying the same saved token can both try to
+     * refresh it, one rotation wins, and the loser is logged out mid-test. A
+     * single worker cannot race itself.
+     */
+    ...(hasSession
+      ? [
+          {
+            name: 'signed-in',
+            testMatch: /signed-in\//,
+            workers: 1,
+            use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
+          },
+        ]
+      : []),
   ],
 });

@@ -129,61 +129,91 @@ const MEANINGS: Array<[RegExp, FeatureName, string]> = [
     "When the city list fails to load the dropdown is empty, but Send code still works and quietly files the citizen under Faridabad - the city built into the app. Someone in Pune would have their report sent to the wrong municipal corporation, with no way to see it happened. This is a recorded known issue, not a new problem.",
   ],
 
-  // --- The home page: is every box drawn, with real content in it? -----------
+  // --- The signed-in home page ----------------------------------------------
   [
-    /draws both panels side by side/,
-    "Home page layout holds together",
-    "One of the two halves of the home page is missing - either the green panel explaining the service, or the white card holding the sign-in form. The page would look broken to anyone arriving.",
+    /shows the portal name and the citizen's corporation/,
+    "Header names the portal and the city",
+    "The header is missing the CosmoSmart Citizen name or the citizen's municipal corporation, so they cannot tell which council they are reporting to.",
   ],
   [
-    /shows the brand block/,
-    "Portal name and logo",
-    "The CosmoSmart name, logo or \"Citizen Portal\" tagline is missing from the top of the page, so a visitor cannot tell whose service this is.",
+    /shows who is signed in/,
+    "Header shows who is signed in",
+    "The signed-in citizen's name is missing from the header. They have no way to confirm whose account they are looking at.",
   ],
   [
-    /shows the headline and the explanation/,
-    "Headline explains the service",
-    "The headline telling citizens this is where to report waterlogging, or the sentence under it, did not appear. A first-time visitor has no idea what the site does.",
+    /offers every section in the main nav/,
+    "All five sections in the menu",
+    "A section is missing from the main menu, or one of the links points somewhere else. Citizens could not reach part of the portal.",
   ],
   [
-    /builds all four feature cards/,
-    "All four feature cards are built",
-    "The panel should list four things the portal does. A different number appeared, so a card is missing or has been drawn twice.",
+    /marks Home as the section you are on/,
+    "Menu highlights the current section",
+    "The menu no longer highlights Home while the citizen is on it, so there is nothing showing where they are.",
   ],
   [
-    /fills every feature card with its own text/,
-    "Each feature card has its own text",
-    "The four cards were drawn, but one of them is empty or is showing the wrong promise. The boxes look right and the words in them do not.",
+    /greets the citizen by name/,
+    "Welcome greets the right citizen",
+    "The welcome banner is missing, or the name it greets does not match the name in the header. A mismatch would mean the page is showing one citizen's details inside another's session - the most serious failure this suite can find.",
   ],
   [
-    /builds both delivery tiles/,
-    "Both ways to get a code are shown",
-    "The two tiles offering an SMS code or an email code did not both appear with their label and description, or neither was ticked. Citizens could not choose how to receive their code.",
+    /explains what the portal is for and offers the main action/,
+    "\"File a new complaint\" is offered",
+    "The explanation under the welcome, or the main File a new complaint button, is missing. That button is the whole point of the page.",
   ],
   [
-    /labels both input boxes/,
-    "Input boxes are labelled",
-    "A box on the form was drawn with no label above it, so nobody - and no screen reader - can tell what to type in it.",
+    /builds all three stat tiles/,
+    "All three summary tiles are built",
+    "One of the three tiles - Total reported, Still open, Completed - did not appear.",
   ],
   [
-    /fills the city dropdown from the corporations API/,
-    "City dropdown has real cities in it",
-    "The \"Your city\" dropdown was drawn but came back empty, or one of the cities has no name. A citizen cannot choose their municipal corporation.",
+    /fills every stat tile with a label/,
+    "Summary tiles have their label and caption",
+    "A summary tile was drawn but is missing its heading, its number or the caption underneath.",
   ],
   [
-    /shows the footer/,
-    "Footer is shown",
-    "The footer naming Cosmos Pumps and the municipal partnership is missing from the bottom of the panel.",
+    /shows a whole number on every stat tile/,
+    "Summary tiles show real numbers",
+    "A tile is showing something that is not a number - a dash, a blank, or the loading placeholder it never replaced. The citizen cannot tell how many reports they have.",
   ],
   [
-    /renders no unresolved values/,
-    "No missing data shown on screen",
-    "Something the page expected to fill in was not there, so it printed the gap instead - words like \"undefined\" or \"NaN\" are visible to citizens. The page still looks laid out correctly, which is why this is easy to miss by eye.",
+    /the stat tiles add up/,
+    "Summary numbers agree with each other",
+    "Still open plus Completed does not equal Total reported. Every complaint is one or the other, so the citizen is being shown a total that contradicts its own breakdown, and cannot trust any of the three.",
   ],
   [
-    /leaves no card empty/,
-    "No card is drawn empty",
-    "A card rendered with its border and spacing but nothing inside it. The layout still looks plausible, so this would pass a quick glance.",
+    /shows the recent complaints card/,
+    "Recent complaints card",
+    "The recent complaints panel, or its View all link through to the full list, is missing.",
+  ],
+  [
+    /never lists more complaints than the citizen has filed/,
+    "Recent list agrees with the total",
+    "The page is listing more complaints than the Total reported tile says exist. One of the two is wrong.",
+  ],
+  [
+    /gives every listed complaint a reference, a location and a status/,
+    "Each complaint shows its details",
+    "A complaint in the list is missing its title, its GRV reference number, its location or its status badge. Without the reference a citizen cannot quote it to the ward office.",
+  ],
+  [
+    /links every listed complaint to its own page/,
+    "Each complaint opens its own page",
+    "A complaint in the list links nowhere, or two of them link to the same page - so a citizen clicking one would see somebody else's report, or nothing.",
+  ],
+  [
+    /explains how the service works in four steps/,
+    "\"How it works\" explains the four steps",
+    "The four-step explanation of how a report is handled is missing or incomplete, so a first-time user does not know what happens after they file.",
+  ],
+  [
+    /shows the account card, agreeing with the header/,
+    "Account card matches the header",
+    "The account panel shows a different city or a different name than the header does. Both come from the same session, so they disagreeing means one of them is wrong.",
+  ],
+  [
+    /still renders the page when the complaints service is down/,
+    "Page survives a backend outage",
+    "When the complaints service cannot be reached the citizen got a blank or broken page. They should still see the menu and be able to file a new report, which is the one thing that matters during a flood.",
   ],
 
   // --- The public page -------------------------------------------------------
@@ -219,7 +249,8 @@ function meaning(title: string): { feature: string; explanation: string } {
 
 /** Which part of the app the test was driving, in plain words. */
 const AREA: Record<string, string> = {
-  "signed-out": "Citizen portal",
+  "signed-out": "Sign-in screen",
+  "signed-in": "Signed-in portal",
 };
 
 /**
