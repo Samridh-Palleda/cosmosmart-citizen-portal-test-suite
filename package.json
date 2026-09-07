@@ -1,16 +1,17 @@
 {
   "name": "cosmosmart-citizen-portal-test-suite",
-  "version": "0.1.0",
-  "description": "Playwright end-to-end test suite for the CosmoSmart citizen portal",
+  "version": "1.0.0",
+  "description": "Playwright test suite for the CosmoSmart citizen portal",
   "scripts": {
     "test": "playwright test",
+    "test:auth": "playwright test auth-form.spec.ts",
+    "test:landing": "playwright test landing.spec.ts",
     "test:headed": "playwright test --headed",
+    "test:watch": "playwright test --headed --workers=1",
     "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --debug",
-    "test:chromium": "playwright test --project=chromium",
-    "report": "playwright show-report",
-    "codegen": "playwright codegen",
-    "typecheck": "tsc --noEmit"
+    "test:failed": "playwright test --last-failed",
+    "typecheck": "tsc --noEmit",
+    "report": "playwright show-report"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +20,8 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.4.1",
+    "dotenv": "^17.4.2",
     "typescript": "^7.0.2"
   },
-  "private": true
+  "main": "index.js"
 }

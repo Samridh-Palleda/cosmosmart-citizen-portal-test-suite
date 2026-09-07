@@ -1,32 +1,82 @@
-import { defineConfig, devices } from '@playwright/test';
+//! TEST RUNNER CONFIG — wires the projects together.
+//! Specs are organised by MODULE folder (auth/, general/, ...). Everything
+//! currently runs SIGNED OUT: the citizen portal's only way in is an emailed
+//! or texted one-time code, which no test can collect yet — see the note on
+//! the `signed-out` project below.
+//! Also sets the base URL, timeouts and reporters (the plain-English job
+//! summary is only used on CI).
 
-const BASE_URL = process.env.BASE_URL ?? 'https://citizen.cosmosmart.example';
+import { defineConfig, devices } from '@playwright/test';
+import 'dotenv/config';
+
+export const AUTH_FILE = 'playwright/.auth/citizen.json';
 
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  timeout: 60_000,
+
+  /*
+   * Two locally, one on CI — the same split the CosmoSmart 2.0 suite settled on,
+   * and for the same reason: the bottleneck is waiting on a live Azure App
+   * Service, not the CPU, so extra workers buy very little and each Chromium
+   * costs several hundred MB. CI runners are small, so they get one.
+   */
+  workers: process.env.CI ? 1 : 2,
+
+  /*
+   * Reporters. See https://playwright.dev/docs/test-reporters
+   *
+   * On CI the goal is that nobody has to download and unzip an artifact to
+   * find out what happened:
+   *   github          - annotates the failing line directly on the run page
+   *   github-summary  - writes a pass/fail table into the run's job summary
+   *   html            - the full report, still uploaded as an artifact for
+   *                     deep debugging (traces, screenshots)
+   *
+   * `open: 'never'` matters: the html reporter otherwise starts a local web
+   * server when a run fails and holds the terminal open, which looks exactly
+   * like a hung test run. Use `npm run report` to view it.
+   */
+  reporter: process.env.CI
+    ? [['github'], ['./reporters/github-summary.ts'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
+
+  /*
+   * The portal is a Vite SPA: the server returns a 1KB shell and React draws
+   * everything afterwards, and the city dropdown needs a further API round trip
+   * to the CosmoSmart backend on a different host. Nothing is on screen at
+   * "page loaded", so assertions get a more realistic window than the 5s default.
+   */
   expect: { timeout: 10_000 },
-  reporter: [
-    ['html', { open: 'never' }],
-    ['list'],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-  ],
+
   use: {
-    baseURL: BASE_URL,
+    baseURL:
+      process.env.BASE_URL ??
+      'https://cosmoscitizenapp-b3h4dqh7bte2ezdw.southindia-01.azurewebsites.net',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
     actionTimeout: 15_000,
-    navigationTimeout: 30_000,
   },
+
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
+    /*
+     * Everything, in a clean browser with no saved session.
+     *
+     * The 2.0 suite splits into `setup` / `signed-out` / `signed-in`, where a
+     * single `auth.setup.ts` signs in once and saves storageState. That split is
+     * deliberately absent here: this portal authenticates ONLY by a 6-digit code
+     * emailed or texted to the citizen, so a test cannot sign itself in without
+     * programmatic access to that inbox.
+     *
+     * When that is solved, mirror 2.0 exactly — add an `auth.setup.ts` writing
+     * AUTH_FILE, list the signed-out specs by filename, and add a `signed-in`
+     * project with `dependencies: ['setup']` and `storageState: AUTH_FILE`.
+     */
+    {
+      name: 'signed-out',
+      use: { ...devices['Desktop Chrome'], storageState: { cookies: [], origins: [] } },
+    },
   ],
 });

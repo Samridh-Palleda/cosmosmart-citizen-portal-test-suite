@@ -1,10 +1,9 @@
 node_modules/
-test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
-.auth/
 .env
-.env.local
-*.log
-.DS_Store
+playwright/.auth/
+playwright-report/
+test-results/
+blob-report/
+
+# QA findings tracker — kept locally, not committed with the test code
+*.xlsx
