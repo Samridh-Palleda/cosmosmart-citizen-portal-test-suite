@@ -4,10 +4,10 @@
   "description": "Playwright test suite for the CosmoSmart citizen portal",
   "scripts": {
     "test": "playwright test",
+    "test:home": "playwright test home.spec.ts",
     "test:auth": "playwright test auth-form.spec.ts",
     "test:landing": "playwright test landing.spec.ts",
-    "test:headed": "playwright test --headed",
-    "test:watch": "playwright test --headed --workers=1",
+    "test:headed": "playwright test --headed --workers=1",
     "test:ui": "playwright test --ui",
     "test:failed": "playwright test --last-failed",
     "typecheck": "tsc --noEmit",

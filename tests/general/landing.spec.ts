@@ -16,12 +16,6 @@ test.describe('Public landing', () => {
     await expect(page.locator('#root')).not.toBeEmpty();
   });
 
-  test('explains what the portal is for', async ({ page }) => {
-    await page.goto('/auth');
-
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/waterlogging/i);
-  });
-
   test('reaches the form without a console error', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => {

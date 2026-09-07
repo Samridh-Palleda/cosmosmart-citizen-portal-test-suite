@@ -129,16 +129,68 @@ const MEANINGS: Array<[RegExp, FeatureName, string]> = [
     "When the city list fails to load the dropdown is empty, but Send code still works and quietly files the citizen under Faridabad - the city built into the app. Someone in Pune would have their report sent to the wrong municipal corporation, with no way to see it happened. This is a recorded known issue, not a new problem.",
   ],
 
+  // --- The home page: is every box drawn, with real content in it? -----------
+  [
+    /draws both panels side by side/,
+    "Home page layout holds together",
+    "One of the two halves of the home page is missing - either the green panel explaining the service, or the white card holding the sign-in form. The page would look broken to anyone arriving.",
+  ],
+  [
+    /shows the brand block/,
+    "Portal name and logo",
+    "The CosmoSmart name, logo or \"Citizen Portal\" tagline is missing from the top of the page, so a visitor cannot tell whose service this is.",
+  ],
+  [
+    /shows the headline and the explanation/,
+    "Headline explains the service",
+    "The headline telling citizens this is where to report waterlogging, or the sentence under it, did not appear. A first-time visitor has no idea what the site does.",
+  ],
+  [
+    /builds all four feature cards/,
+    "All four feature cards are built",
+    "The panel should list four things the portal does. A different number appeared, so a card is missing or has been drawn twice.",
+  ],
+  [
+    /fills every feature card with its own text/,
+    "Each feature card has its own text",
+    "The four cards were drawn, but one of them is empty or is showing the wrong promise. The boxes look right and the words in them do not.",
+  ],
+  [
+    /builds both delivery tiles/,
+    "Both ways to get a code are shown",
+    "The two tiles offering an SMS code or an email code did not both appear with their label and description, or neither was ticked. Citizens could not choose how to receive their code.",
+  ],
+  [
+    /labels both input boxes/,
+    "Input boxes are labelled",
+    "A box on the form was drawn with no label above it, so nobody - and no screen reader - can tell what to type in it.",
+  ],
+  [
+    /fills the city dropdown from the corporations API/,
+    "City dropdown has real cities in it",
+    "The \"Your city\" dropdown was drawn but came back empty, or one of the cities has no name. A citizen cannot choose their municipal corporation.",
+  ],
+  [
+    /shows the footer/,
+    "Footer is shown",
+    "The footer naming Cosmos Pumps and the municipal partnership is missing from the bottom of the panel.",
+  ],
+  [
+    /renders no unresolved values/,
+    "No missing data shown on screen",
+    "Something the page expected to fill in was not there, so it printed the gap instead - words like \"undefined\" or \"NaN\" are visible to citizens. The page still looks laid out correctly, which is why this is easy to miss by eye.",
+  ],
+  [
+    /leaves no card empty/,
+    "No card is drawn empty",
+    "A card rendered with its border and spacing but nothing inside it. The layout still looks plausible, so this would pass a quick glance.",
+  ],
+
   // --- The public page -------------------------------------------------------
   [
     /boots the app rather than serving an empty shell/,
     "The app actually starts",
     "The server answered, but nothing was drawn on the page. The site is built so that the server always replies successfully even when the app itself is broken, so this is the check that tells them apart.",
-  ],
-  [
-    /explains what the portal is for/,
-    "Front page explains the service",
-    "The panel telling citizens this is where to report waterlogging is missing, so a first-time visitor has no idea what the site does.",
   ],
   [
     /reaches the form without a console error/,

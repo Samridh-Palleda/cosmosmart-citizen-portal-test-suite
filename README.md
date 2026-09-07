@@ -6,8 +6,8 @@ resolved, and rate the work. Built to the same conventions as the
 [CosmoSmart 2.0 suite](https://github.com/cosmos-pumps/cosmosmart2.0-test-suite),
 which covers the staff-facing dashboard on the same backend.
 
-18 tests today, all of them against the sign-in and registration screen and the
-public landing page. **Read-only: the suite never sends a real one-time code.**
+28 tests today across the home page, the sign-in and registration screen, and
+the public page health checks. **Read-only: the suite never sends a real one-time code.**
 
 ## Setup
 
@@ -22,13 +22,19 @@ No account or credentials are required. See [Why nothing signs in](#why-nothing-
 ## Running
 
 ```bash
-npm test              # everything (~35s)
+npm test              # everything (~48s)
+npm run test:home     # the home page cards and content only
 npm run test:auth     # the sign-in / registration form only
-npm run test:landing  # the public page only
-npm run test:watch    # headed, ONE worker — watch tests run one at a time
+npm run test:landing  # app health, console errors, phone layout
+npm run test:headed   # headed, ONE worker — watch tests run one at a time
 npm run test:ui       # interactive runner
 npm run report        # open the last HTML report
 ```
+
+`test:headed` pins `--workers=1` on purpose. The point of a headed run is to
+watch it, and with the default two workers Playwright opens two browser windows
+that race each other across the screen — unreadable. One worker runs the specs
+one at a time, in order.
 
 ### Running one file
 
@@ -42,6 +48,7 @@ npx playwright test auth-form.spec.ts
 
 | Path                  | What is in it                                          |
 | --------------------- | ------------------------------------------------------ |
+| `tests/home/`         | The home page — every card, box and its content        |
 | `tests/auth/`         | The sign-in and Create Account form                    |
 | `tests/general/`      | The public landing page, phone layout, console errors  |
 | `tests/pages/`        | Page objects — the only files that know the markup     |
@@ -81,9 +88,15 @@ against:
 | `GET  /api/public/grievance/corporations` | The "Your city" dropdown                            |
 | `POST /api/public/grievance/otp`          | Sending a code — intercepted, never called for real |
 
-The screen is properly labelled — real tabs, a named radiogroup, a labelled
-combobox — so every locator is role-based and none reach for a CSS class. No
-`data-testid` attributes are needed on this account.
+The interactive parts are properly labelled — real tabs, a named radiogroup, a
+labelled combobox — so `tests/pages/auth-page.ts` is entirely role-based and no
+`data-testid` attributes are needed.
+
+The marketing panel is not: the brand block, the headline's surrounding copy,
+the four feature cards and the footer are plain `div`s with no ARIA role, so
+`tests/pages/home-page.ts` has to select them by class name (`.auth-feat`,
+`.auth-brand-footer`). Those are the suite's only class-based locators, and they
+are the first thing to break if the styling is refactored.
 
 ## Known issues
 
